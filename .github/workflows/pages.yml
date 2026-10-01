@@ -1,4 +1,4 @@
-name: Deploy Baichuan Smithy
+name: Deploy Baichuan Smithy Modular
 
 on:
   push:
@@ -20,7 +20,6 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -28,11 +27,22 @@ jobs:
       - name: Configure Pages
         uses: actions/configure-pages@v5
 
-      - name: Prepare site
+      - name: Assemble site
+        shell: bash
         run: |
+          set -euo pipefail
           rm -rf _site
           mkdir _site
-          unzip -q baichuan-smithy-site.zip -d _site
+          test -f baichuan-app.zip
+          unzip -q baichuan-app.zip -d _site
+          shopt -s nullglob
+          packs=(asset-*.zip)
+          for z in "${packs[@]}"; do
+            echo "Merging $z"
+            unzip -qo "$z" -d _site
+          done
+          touch _site/.nojekyll
+          test -f _site/index.html
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
