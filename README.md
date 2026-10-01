@@ -1,1 +1,1 @@
-# -baichuan-smithy
+# baichuan-smithy
